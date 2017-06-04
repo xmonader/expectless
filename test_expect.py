@@ -3,14 +3,18 @@ from sys import stdout, stdin
 # print("Hello")
 from time import sleep
 
-# print("name:")
-# name = stdin.readline()
-# print("Hello", name)
-# # sleep(5)
-# print("password:")
-# pass_ = stdin.readline()
-# print("Password is :", pass_)
+# try:
+#     print("name:")
+#     name = stdin.readline()
+#     print("Hello", name)
+#     # sleep(5)
+#     print("password:")
+#     pass_ = stdin.readline()
+#     print("Password is :", pass_)
  
+# except Exception as e:
+#     pass
+
 name = input("name:")
 print("Hello ", name)
 
