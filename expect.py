@@ -6,7 +6,7 @@ import fcntl
 from time import sleep
 import termios
 import pty
-
+import tty
 
 def setecho(fd, state=True):
     attrs = termios.tcgetattr(fd)
@@ -14,13 +14,12 @@ def setecho(fd, state=True):
     if state:
         attrs[3] = attrs[3] | termios.ECHO | termios.ECHONL
     else:
-        attrs[3] = attrs[3] & ~termios.ECHO & ~termios.ECHONL
+        attrs[3] = attrs[3] & ~termios.ECHO & ~termios.ECHONL & ~termios.ICANON
 
     termios.tcsetattr(fd, termios.TCSADRAIN, attrs)
 
 def expect(args=[], expectations={}):
     master, slave = pty.openpty()
-
     pid = os.fork()
     if pid == 0:
         os.setsid()  # lose the controlling termnial
@@ -37,14 +36,13 @@ def expect(args=[], expectations={}):
         os.dup2(slave, 1)
         os.dup2(slave, 2)
 
-        if len(args) == 1:
-            os.execlp(args[0], "") # at least 2 args. even if 2nd is empty
-        elif len(args) > 1:
-            os.execlp(args[0], *args[1:])
+        os.execlp(args[0], *args)
     else:
         os.close(slave)
+        if not expectations: return master, pid
         shouldreturn = False
-        while not shouldreturn:
+        # tty.setraw(slave)
+        while not shouldreturn and expectations:
             rds, wds, eds = select.select([master], [master], [], 0.01)
             towritenext = None
             msg = ""
@@ -59,7 +57,7 @@ def expect(args=[], expectations={}):
                     except EOFError:
                         print("EOF ERROR")
                         shouldreturn = True
-                        os.close(master)
+                        # os.close(master)
                     msg += out
                     if msg in expectations:
                         break
@@ -81,20 +79,44 @@ def expect(args=[], expectations={}):
     return master, pid
 
 
+def interact(master):
+    doneinteract = False
+    # setecho(master, False)
+    # tty.setraw(master)
+    stdfd = sys.stdin.fileno()
+    # orig = tty.tcgetattr(stdfd)
+    # tty.setraw(stdfd)
+
+    while not doneinteract:
+        rds, wds, eds = select.select([master, stdfd], [], [], 0.01)
+        if master in rds:
+            try:
+                msg = os.read(master, 1024)
+            except IOError:
+                doneinteract = True
+            os.write(sys.stdout.fileno(), msg)
+            # continue
+        if stdfd in rds:
+            msg = os.read(stdfd, 1024)
+            os.write(master, msg)
+    # tty.tcsetattr(stdfd, tty.TCSAFLUSH, orig)
 def main():
     expectations = {
         'name:': 'my name',
         'password:': 'my password',
     }
     p = expect(["./test_expect.py"], expectations=expectations)
-    print(p)
     p = expect(["./hello"], expectations={'name':'ahmed'})
-    print(p)
-    p = expect(["ssh", "-T", "mie@localhost", "ls /home/ahmed"], expectations={"mie@localhost's password:":'mie'})
+    p = expect(["ssh", "-T", "mie@localhost", "ls /home"], expectations={"mie@localhost's password:":'mie'})
+    # p = expect(["python3"])
+    # interact(p[0])
+    # p = expect(["ssh", "-T", "mie@localhost"], expectations={"mie@localhost's password:":'mie'})
+    # interact(p[0])
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        sys.stdout.write(str(e))
-        #import ipdb; ipdb.set_trace()
+    # try:
+    #     main()
+    # except Exception as e:
+    #     sys.stdout.write(str(e))
+    #     #import ipdb; ipdb.set_trace()
+    main()
