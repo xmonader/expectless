@@ -5,7 +5,7 @@ from subprocess import Popen, PIPE, STDOUT
 import fcntl
 from time import sleep
 import termios
-import pty 
+import pty
 
 
 def setecho(fd, state=True):
@@ -22,16 +22,16 @@ def expect(args=[], expectations={}):
     master, slave = pty.openpty()
 
     pid = os.fork()
-    if pid == 0: 
+    if pid == 0:
         os.setsid()  # lose the controlling termnial
-        child_name = os.ttyname(slave)   
+        child_name = os.ttyname(slave)
         fd = os.open(child_name, os.O_RDWR)
         os.close(fd)
 
         os.close(master) # close the master end
 
         # close STDIN, STDOUT, STDERR 0, 1, 2
-        os.closerange(0, 3) 
+        os.closerange(0, 3)
         # duplicate slave to STDIN, STDOUT, STDERR
         os.dup2(slave, 0)
         os.dup2(slave, 1)
@@ -65,7 +65,6 @@ def expect(args=[], expectations={}):
                         break
                     if out == "" or "\n" in out: # Line buffering.
                         break
-                    sleep(0.01)
             except IOError as e:
                 shouldreturn = True
             if msg:
@@ -84,13 +83,14 @@ def expect(args=[], expectations={}):
 
 def main():
     expectations = {
-        'name:': 'auser',
-        'password:': 'password',
+        'name:': 'my name',
+        'password:': 'my password',
     }
     p = expect(["./test_expect.py"], expectations=expectations)
     print(p)
     p = expect(["./hello"], expectations={'name':'ahmed'})
     print(p)
+    p = expect(["ssh", "-T", "mie@localhost", "ls /home/ahmed"], expectations={"mie@localhost's password:":'mie'})
 
 if __name__ == '__main__':
     try:
