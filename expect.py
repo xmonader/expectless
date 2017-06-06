@@ -125,8 +125,9 @@ def main():
     p = expect(["./hello"], expectations=[('name', 'ahmed')])
     # interact(p[0])
     p = expect(["ssh", "-T", "mie@10.147.19.169", "ls /home"], expectations=[("mie@10.147.19.169's password:", 'mie')])
-    
-    p = expect(["python3"])
+
+    p = expect(["python3"])    
+    # p = expect(["python3"], expectations=[(">>> ", "x=4"), (">>> ", "y=5")])
     interact(p[0])
     # #
     p = expect(["ssh", "-T", "mie@10.147.19.169"], expectations=[("mie@10.147.19.169's password:", 'mie')])
