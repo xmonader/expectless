@@ -1,1 +1,1 @@
-from .expect import expect
+from .expect import expect, interact

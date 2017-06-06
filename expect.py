@@ -21,6 +21,15 @@ def setecho(fd, state=True):
 
 
 def expect(args=[], expectations=[], exact=True):
+    """
+    run an executable specified in args and feeds it values from expectations list.
+
+    @param args list: execlp arguments.
+    @param expectations list: list of expected prompts of the invoked command.
+    @param exact bool: used to support regular expressions in the expectations list.
+
+    """
+
     def match(x, y):
         if exact:
             return x == y
@@ -95,6 +104,13 @@ def expect(args=[], expectations=[], exact=True):
 
 
 def interact(master):
+    """
+    Interact with the invoked application after consuming the expectations list if provided
+
+    @param master int: file descriptor.
+
+    """
+
     doneinteract = False
     stdfd = sys.stdin.fileno()
     orig = termios.tcgetattr(stdfd)
@@ -124,13 +140,13 @@ def main():
     p = expect(["./test_expect.py"], expectations=expectations)
     p = expect(["./hello"], expectations=[('name', 'ahmed')])
     # interact(p[0])
-    p = expect(["ssh", "-T", "mie@10.147.19.169", "ls /home"], expectations=[("mie@10.147.19.169's password:", 'mie')])
+    p = expect(["ssh", "-T", "dmdmdm@10.147.19.162", "ls /home"], expectations=[("dmdmdm@10.147.19.162's password:", 'dmdmdm')])
 
     p = expect(["python3"])    
     # p = expect(["python3"], expectations=[(">>> ", "x=4"), (">>> ", "y=5")])
     interact(p[0])
     # #
-    p = expect(["ssh", "-T", "mie@10.147.19.169"], expectations=[("mie@10.147.19.169's password:", 'mie')])
+    p = expect(["ssh", "-T", "dmdmdm@10.147.19.162"], expectations=[("dmdmdm@10.147.19.162's password:", 'dmdmdm')])
     interact(p[0])
 
 
