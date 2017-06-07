@@ -1,17 +1,14 @@
 import sys
 import os
 import select
-from subprocess import Popen, PIPE, STDOUT
-import fcntl
-from time import sleep
 import termios
 import pty
 import tty
 import re
 
+
 def setecho(fd, state=True):
     attrs = termios.tcgetattr(fd)
-
     if state:
         attrs[3] = attrs[3] | termios.ECHO | termios.ECHONL
     else:
@@ -53,7 +50,7 @@ def expect(args=[], expectations=[], exact=True):
         fd = os.open(child_name, os.O_RDWR)
         os.close(fd)
 
-        os.close(master) # close the master end
+        os.close(master)  # close the master end
 
         # close STDIN, STDOUT, STDERR 0, 1, 2
         os.closerange(0, 3)
@@ -117,7 +114,7 @@ def interact(master):
     tty.setraw(stdfd)
     while not doneinteract:
         rds, wds, eds = select.select([stdfd, master], [], [], 0.01)
-        if  master in rds:
+        if master in rds:
             try:
                 msg = os.read(master, 1024)
             except Exception:
@@ -140,13 +137,13 @@ def main():
     p = expect(["./test_expect.py"], expectations=expectations)
     p = expect(["./hello"], expectations=[('name', 'ahmed')])
     # interact(p[0])
-    p = expect(["ssh", "-T", "dmdmdm@10.147.19.162", "ls /home"], expectations=[("dmdmdm@10.147.19.162's password:", 'dmdmdm')])
+    p = expect(["ssh", "-T", "mie@localhost", "ls /home"], expectations=[("mie@localhost's password:", 'mie')])
 
-    p = expect(["python3"])    
+    p = expect(["python3"])
     # p = expect(["python3"], expectations=[(">>> ", "x=4"), (">>> ", "y=5")])
     interact(p[0])
     # #
-    p = expect(["ssh", "-T", "dmdmdm@10.147.19.162"], expectations=[("dmdmdm@10.147.19.162's password:", 'dmdmdm')])
+    p = expect(["ssh", "mie@localhost"], expectations=[("mie@localhost's password:", 'mie')])
     interact(p[0])
 
 
