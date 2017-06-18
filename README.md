@@ -27,6 +27,8 @@ You can interact with the application
     p = expect(["python3"])    
     interact(p[0])
 ```
+## expectless In action
+[![asciicast](https://asciinema.org/a/2uek7k78ldtfw6s0as15dtepd.png)](https://asciinema.org/a/2uek7k78ldtfw6s0as15dtepd)
 
 ## But why?
 I wanted to learn about PTYs `Pseudoterminal` and I always liked `expect` tool
